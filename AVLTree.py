@@ -1,9 +1,9 @@
-# id1:
-# name1:
-# username1:
-# id2:
-# name2:
-# username2:
+# id1: 212825715
+# name1: Yonatan Nitzan
+# username1: yonatann2
+# id2: 20816055
+# name2:Ortal Simany
+# username2:ortalsimany
 
 
 """A class represnting a node in an AVL tree"""
