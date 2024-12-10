@@ -33,7 +33,13 @@ class AVLNode(object):
 	"""
 
     def is_real_node(self):
-        return False
+        return self.key is not None
+
+    def add_virtual_kids(self):
+        if self.right is None:
+            self.right = AVLNode(None, None)
+        if self.left is None:
+            self.left = AVLNode(None, None)
 
 
 """
