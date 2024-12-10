@@ -48,9 +48,11 @@ class AVLTree(object):
 
     def __init__(self):
         self.root = None
+        self.size = 0
+        self.max = None
 
     """searches for a node in the dictionary corresponding to the key (starting at the root)
-        
+		
 	@type key: int
 	@param key: a key to be searched
 	@rtype: (AVLNode,int)
@@ -62,7 +64,7 @@ class AVLTree(object):
         return None, -1
 
     """searches for a node in the dictionary corresponding to the key, starting at the max
-        
+		
 	@type key: int
 	@param key: a key to be searched
 	@rtype: (AVLNode,int)
@@ -168,7 +170,7 @@ class AVLTree(object):
 	"""
 
     def size(self):
-        return -1
+        return self.size
 
     """returns the root of the tree representing the dictionary
 
@@ -177,4 +179,4 @@ class AVLTree(object):
 	"""
 
     def get_root(self):
-        return None
+        return self.root
