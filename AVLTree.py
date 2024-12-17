@@ -4,7 +4,7 @@
 # id2: 20816055
 # name2:Ortal Simany
 # username2:ortalsimany
-
+from typing import Any
 
 """A class represnting a node in an AVL tree"""
 
@@ -19,12 +19,12 @@ class AVLNode(object):
     """
 
     def __init__(self, key, value):
-        self.key = key
+        self.key: int = key
         self.value = value
-        self.left = None
-        self.right = None
-        self.parent = None
-        self.height = -1
+        self.left: AVLNode = None
+        self.right: AVLNode = None
+        self.parent: AVLNode = None
+        self.height: int = -1
 
     """returns whether self is not a virtual node 
 
@@ -32,13 +32,19 @@ class AVLNode(object):
 	@returns: False if self is a virtual node, True otherwise.
 	"""
 
-    def is_real_node(self):
+    def is_real_node(self) -> bool:
         return self.key is not None
 
-    def is_leaf_node(self):
+    def is_leaf_node(self) -> bool:
         return not self.left.is_real_node() and not self.right.is_real_node()
 
-    def get_balance_factor(self):
+    def is_left_child(self) -> bool:
+        return self == self.parent.left
+
+    def is_right_child(self) -> bool:
+        return self == self.parent.right
+
+    def get_balance_factor(self) -> int:
         return self.left.height - self.right.height
 
     def calc_height(self):
@@ -50,29 +56,23 @@ class AVLNode(object):
         if self.left is None:
             self.insert_child(AVLNode(None, None), False)
 
-    def insert_child(self, child, right):
+    def insert_child(self, child: "AVLNode", right: bool):
         if right:
             self.right = child
         else:
             self.left = child
         child.parent = self
 
-    def create_leaf(self, spot):
+    def create_leaf(self, spot: "AVLNode"):
         self.height = 0
         self.replace_child(spot)
 
-    def replace_child(self, other):
+    def replace_child(self, other: "AVLNode"):
         self.parent = other.parent
         if other.is_left_child():
             self.parent.left = self
         else:
             self.parent.right = self
-
-    def is_left_child(self):
-        return self == self.parent.left
-
-    def is_right_child(self):
-        return self == self.parent.right
 
     def __str__(self) -> str:
         return f"({self.key}, {self.value})"
@@ -88,17 +88,17 @@ class AVLTree(object):
     Constructor, you are allowed to add more fields.
     """
 
-    def __init__(self, node=None):
+    def __init__(self, node: AVLNode = None):
         if node is None:
-            self.root = None
-            self.t_size = 0
-            self.max = None
+            self.root: AVLNode = None
+            self.t_size: int = 0
+            self.max: AVLNode = None
         else:
             self.tree_from_root(node)
 
     """ Construct a tree from an existing node (used for split & join)"""
 
-    def tree_from_root(self, node):
+    def tree_from_root(self, node: AVLNode):
         self.root = node
         self.t_size = len(self.avl_to_array())
         self.max = self.root
@@ -114,7 +114,7 @@ class AVLTree(object):
 	and e is the number of edges on the path between the starting node and ending node+1.
 	"""
 
-    def search(self, key):
+    def search(self, key: int) -> tuple[AVLNode | None, int]:
         return self.search_from_return(self.root)
 
     """searches for a node in the dictionary corresponding to the key, starting at the max
@@ -126,7 +126,7 @@ class AVLTree(object):
 	and e is the number of edges on the path between the starting node and ending node+1.
 	"""
 
-    def finger_search(self, key):
+    def finger_search(self, key: int) -> tuple[AVLNode | None, int]:
         node = self.max
         dist = 1
 
@@ -139,13 +139,17 @@ class AVLTree(object):
 
     """Wrapper Fucntion for search_from that returns in the format they want"""
 
-    def search_from_return(self, key, node, dist=1):
+    def search_from_return(
+        self, key: int, node: AVLNode, dist: int = 1
+    ) -> tuple[AVLNode | None, int]:
         node, dist = self.search_from(self, key, node, dist)
         return node if node.is_real_node() else None, dist
 
     """Helper Function: Search for a key begining from the given node."""
 
-    def search_from(self, key, node, dist=1):
+    def search_from(
+        self, key: int, node: AVLNode, dist: int = 1
+    ) -> tuple[AVLNode, int]:
         while node.key != key and node.is_real_node():
             node = node.right if key > node.key else node.left
             dist += 1
@@ -165,7 +169,7 @@ class AVLTree(object):
 	and h is the number of PROMOTE cases during the AVL rebalancing
 	"""
 
-    def insert(self, key, val):
+    def insert(self, key: int, val) -> tuple[AVLNode, int, int]:
         node = AVLNode(key, val)
         # Add virtual kids that may be replaced later
         node.add_virtual_kids()
@@ -197,7 +201,7 @@ class AVLTree(object):
 	and h is the number of PROMOTE cases during the AVL rebalancing
 	"""
 
-    def finger_insert(self, key, val):
+    def finger_insert(self, key: int, val) -> tuple[AVLNode, int, int]:
         node = AVLNode(key, val)
         # Add virtual kids that may be replaced later
         node.add_virtual_kids()
@@ -226,7 +230,7 @@ class AVLTree(object):
     @pre: spot is a virtual node
     """
 
-    def insert_at(self, spot, node):
+    def insert_at(self, spot: AVLNode, node: AVLNode) -> int:
         # Maintain pointer to max node
         if node.key > self.max.key:
             self.max = node
@@ -250,7 +254,7 @@ class AVLTree(object):
 	@pre: node is a real pointer to a node in self
 	"""
 
-    def delete(self, node):
+    def delete(self, node: AVLNode):
         self.size -= 1
 
         if node == self.root:
@@ -298,7 +302,7 @@ class AVLTree(object):
 	or the opposite way
 	"""
 
-    def join(self, tree2, key, val):
+    def join(self, tree2: AVLNode, key: int, val):
         # Handle edge cases
         if self.root is None:
             tree2.insert(key, val)
@@ -356,7 +360,7 @@ class AVLTree(object):
 	"""
 
     # TODO: Implement split
-    def split(self, node):
+    def split(self, node: AVLNode) -> ("AVLTree", "AVLTree"):
         # Spliting from root is simple
         if node == self.root:
             return AVLTree(node.left), AVLTree(node.right)
@@ -374,7 +378,12 @@ class AVLTree(object):
     @returns: an integer p, where p is the number of promotes that happened during rebalancing
     """
 
-    def rebalance(self, node):
+    def rebalance(self, node: AVLNode) -> int:
+        """_summary_
+
+        Args:
+            node (AVLNode): _description_
+        """
         p = 0
 
         while node is not None:
@@ -406,8 +415,9 @@ class AVLTree(object):
             node = node.parent
 
     """Rotation helper functions"""
+    # TODO: No need to pass more than one node
 
-    def r_rotate(self, y, x):
+    def r_rotate(self, y: AVLNode, x: AVLNode):
         b = x.right
         x.replace_child(y)
         x.insert_child(y, True)
@@ -416,7 +426,7 @@ class AVLTree(object):
         y.calc_height()
         x.calc_height()
 
-    def l_rotate(self, y, x):
+    def l_rotate(self, y: AVLNode, x: AVLNode):
         b = x.left
         x.replace_child(y)
         x.insert_child(y, False)
@@ -425,11 +435,11 @@ class AVLTree(object):
         y.calc_height()
         x.calc_height()
 
-    def lr_rotate(self, y, x, z):
+    def lr_rotate(self, y: AVLNode, x: AVLNode, z: AVLNode):
         self.l_rotate(x, z)
         self.r_rotate(y, z)
 
-    def rl_rotate(self, y, x, z):
+    def rl_rotate(self, y: AVLNode, x: AVLNode, z: AVLNode):
         self.r_rotate(x, z)
         self.l_rotate(y, z)
 
@@ -445,7 +455,7 @@ class AVLTree(object):
 
     """Helper function: recursively generate a sorted list of (key, value) pairs in a tree"""
 
-    def in_order(self, node):
+    def in_order(self, node: AVLNode) -> list[tuple[int, Any]]:
         if not node.is_real_node():
             return []
 
