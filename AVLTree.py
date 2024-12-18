@@ -251,7 +251,8 @@ class AVLTree(object):
             node = node.right if key > node.key else node.left
             dist += 1
 
-        return node, dist
+        # If no node was found, only include the search distance within real nodes
+        return node, dist if node.is_real_node() else dist - 1
 
     """Search for a key begining from the max node
     

@@ -174,7 +174,6 @@ class TestAVLTree(unittest.TestCase):
         tree.insert(30, "thirty")
         left_tree, right_tree = tree.split(node)
         self.assertEqual(left_tree.avl_to_array(), [(5, "five")])
-        # FAILING AT JOIN
         self.assertEqual(
             right_tree.avl_to_array(),
             [(15, "fifteen"), (17, "seventeen"), (20, "twenty"), (30, "thirty")],
