@@ -2,8 +2,8 @@
 # name1: Yonatan Nitzan
 # username1: yonatann2
 # id2: 20816055
-# name2:Ortal Simany
-# username2:ortalsimany
+# name2: Ortal Simany
+# username2: ortalsimany
 from typing import Any
 
 """A class represnting a node in an AVL tree"""
@@ -18,7 +18,7 @@ class AVLNode(object):
     @param value: data of your node
     """
 
-    def __init__(self, key, value):
+    def __init__(self, key=None, value=None):
         self.key: int = key
         self.value = value
         self.left: AVLNode = None
@@ -35,26 +35,56 @@ class AVLNode(object):
     def is_real_node(self) -> bool:
         return self.key is not None
 
+    """Returns whether self is a leaf node
+    
+    @rtype: bool
+    @returns: True if self has only virtual kids
+    """
+
     def is_leaf_node(self) -> bool:
         return not self.left.is_real_node() and not self.right.is_real_node()
+
+    """Returns whether self is the left child of its parent
+    
+    @rtype: bool
+    @returns: False if self has no parent or if it is not its left child, True otherwise
+    """
 
     def is_left_child(self) -> bool:
         return self == self.parent.left if self.parent is not None else False
 
+    """Returns whether self is the right child of its parent
+    
+    @rtype: bool
+    @returns: False if self has no parent or if it is not its right child, True otherwise
+    """
+
     def is_right_child(self) -> bool:
         return self == self.parent.right if self.parent is not None else False
+
+    """Returns the balance factor of self
+    
+    @rtype: int
+    @returns: The difference between the heights of self's left and right children
+    """
 
     def get_balance_factor(self) -> int:
         return self.left.height - self.right.height
 
+    """Updates the height of self according to its children
+    The height should be the max height between the children plus one
+    """
+
     def calc_height(self):
         self.height = max(self.left.height, self.right.height) + 1
 
-    def add_virtual_kids(self):
-        if self.right is None:
-            self.insert_child(AVLNode(None, None), True)
-        if self.left is None:
-            self.insert_child(AVLNode(None, None), False)
+    """Add a child to self and update the parent field of the child
+    
+    @type child: AVLNode
+    @param child: The child to add
+    @type right: bool
+    @param right: True if adding right child, False if left
+    """
 
     def insert_child(self, child: "AVLNode", right: bool):
         if right:
@@ -63,18 +93,59 @@ class AVLNode(object):
             self.left = child
         child.parent = self
 
+    """Add a right child to self and update the parent field of the child
+    
+    @type child: AVLNode
+    @param child: The child to add
+    """
+
+    def insert_right(self, child: "AVLNode"):
+        self.insert_child(child, True)
+
+    """Add a left child to self and update the parent field of the child
+    
+    @type child: AVLNode
+    @param child: The child to add
+    """
+
+    def insert_left(self, child: "AVLNode"):
+        self.insert_child(child, False)
+
+    """Adds a virtual child where self has none"""
+
+    def add_virtual_children(self):
+        if self.right is None:
+            self.insert_right(AVLNode())
+        if self.left is None:
+            self.insert_left(AVLNode())
+
+    """Replace the other node with self
+    Height not updated
+    
+    @type other: AVLNode
+    @param other: The node to replace
+    """
+
+    def replace_child(self, other: "AVLNode"):
+        # Update self
+        self.parent = other.parent
+        # Update parent
+        if other.is_left_child():
+            self.parent.left = self
+        if other.is_right_child():
+            self.parent.right = self
+
+    """Replace a virtual node with self and set height to 0
+    
+    @type other: AVLNode
+    @param other: The node to replace
+    """
+
     def create_leaf(self, spot: "AVLNode"):
         self.height = 0
         self.replace_child(spot)
 
-    def replace_child(self, other: "AVLNode"):
-        self.parent = other.parent
-        if self.parent is None:
-            return
-        if other.is_left_child():
-            self.parent.left = self
-        else:
-            self.parent.right = self
+    """Represent self as a key, value pair"""
 
     def __str__(self) -> str:
         return f"({self.key}, {self.value})"
@@ -182,7 +253,7 @@ class AVLTree(object):
     def insert(self, key: int, val) -> tuple[AVLNode, int, int]:
         node = AVLNode(key, val)
         # Add virtual kids that may be replaced later
-        node.add_virtual_kids()
+        node.add_virtual_children()
 
         # First insert, create the root
         if self.t_size == 0:
@@ -214,7 +285,7 @@ class AVLTree(object):
     def finger_insert(self, key: int, val) -> tuple[AVLNode, int, int]:
         node = AVLNode(key, val)
         # Add virtual kids that may be replaced later
-        node.add_virtual_kids()
+        node.add_virtual_children()
 
         # First insert, create the root
         if self.t_size == 0:
@@ -272,15 +343,12 @@ class AVLTree(object):
                 node.parent.right = None
             if node.is_left_child():
                 node.parent.left = None
-            node.parent.add_virtual_kids()
+            node.parent.add_virtual_children()
 
         # Only one child: left
         elif not node.right.is_real_node() or not node.left.is_real_node():
             child = node.left if node.left.is_real_node() else node.right
-            if node.is_right_child():
-                node.parent.insert_child(child, True)
-            if node.is_left_child():
-                node.parent.insert_child(child, False)
+            node.parent.insert_child(child, node.is_right_child())
             # Update root pointer if needed
             if node == self.root:
                 self.root = child
@@ -351,11 +419,11 @@ class AVLTree(object):
 
         # Attach subtrees to the new node
         if tall.root.key > key:
-            node.insert_child(short.root, False)
-            node.insert_child(current, True)
+            node.insert_left(short.root)
+            node.insert_right(current)
         else:
-            node.insert_child(current, False)
-            node.insert_child(short.root, True)
+            node.insert_left(current)
+            node.insert_right(short.root)
 
         # Reattach parent if there was one
         if parent is not None:
@@ -454,6 +522,7 @@ class AVLTree(object):
             self.root = child
         # The only subtree that need be moved
         subtree = child.right if right else child.left
+        # Rotate
         child.replace_child(node)
         child.insert_child(node, right)
         node.insert_child(subtree, not right)
@@ -539,11 +608,11 @@ class AVLTree(object):
             for node in current_level:
                 if node.is_real_node():
                     level_output.append(f"({node.key}, {node.value}, {node.height})")
-                    next_level.append(node.left if node.left else AVLNode(None, None))
-                    next_level.append(node.right if node.right else AVLNode(None, None))
+                    next_level.append(node.left if node.left else AVLNode())
+                    next_level.append(node.right if node.right else AVLNode())
                 else:
                     level_output.append("(None)")
-                    next_level.append(AVLNode(None, None))
-                    next_level.append(AVLNode(None, None))
+                    next_level.append(AVLNode())
+                    next_level.append(AVLNode())
             print(" ".join(level_output))
             current_level = next_level
