@@ -566,6 +566,8 @@ class AVLTree(object):
 
             node = node.parent
 
+        return p
+
     """Rotate the node and its right/left child via left/right rotation
     
     @type node: AVLNode
