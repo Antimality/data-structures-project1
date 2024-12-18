@@ -10,7 +10,7 @@ from typing import Any
 
 
 class AVLNode(object):
-    """Constructor, you are allowed to add more fields.
+    """Constructor. Can make a virtual node by not passing any parameters.
 
     @type key: int
     @param key: key of your node
@@ -38,7 +38,7 @@ class AVLNode(object):
     """Returns whether self is a leaf node
     
     @rtype: bool
-    @returns: True if self has only virtual kids
+    @returns: True if self has only virtual children
     """
 
     def is_leaf_node(self) -> bool:
@@ -158,7 +158,10 @@ A class implementing an AVL tree.
 
 class AVLTree(object):
     """
-    Constructor, you are allowed to add more fields.
+    Constructor. Given node, initiate a tree with node as its root
+
+    @type node: AVLNode
+    @param node: A node that is to become the root of the tree
     """
 
     def __init__(self, node: AVLNode = None):
@@ -168,14 +171,21 @@ class AVLTree(object):
         if node is not None:
             self.tree_from_root(node)
 
-    """ Construct a tree from an existing node (used for split & join)"""
+    """ Construct a tree from an existing node (used for split & join)
+    
+    @type node: AVLNode
+    @param node: A node that is to become the root of the tree
+    """
 
     def tree_from_root(self, node: AVLNode):
+        # Ignore a tree that is virtually empty
         if not node.is_real_node():
             return
+        # Detatch tree from its parent
+        node.parent = None
         self.root = node
-        self.root.parent = None
         self.t_size = len(self.in_order(node))
+        # Update max pointer
         self.max = self.root
         while self.max.right.is_real_node():
             self.max = self.max.right
@@ -204,7 +214,16 @@ class AVLTree(object):
     def finger_search(self, key: int) -> tuple[AVLNode | None, int]:
         return self.search_result_wrapper(self.search_from_max(key))
 
-    """Wrapper Fucntion for search_from that returns in the format they want"""
+    """Wrapper Fucntion for search_from that returns in the format they want
+    Recieves the result of a search_from function and returns the same,
+    but if the node is virtual it replaces it with None.
+    
+    @type tup: (AVLNode, int)
+    @param tup: The result of a search_from function
+    @rtype: (AVLNode|None, int)
+    @returns: a tuple (x,e) where x is the node corresponding to key (or None if not found),
+	and e is the number of edges on the path between the starting node and ending node+1.
+    """
 
     def search_result_wrapper(
         self, tup: tuple[AVLNode, int]
@@ -213,7 +232,17 @@ class AVLTree(object):
         dist = tup[1]
         return node if node.is_real_node() else None, dist
 
-    """Helper Function: Search for a key begining from the given node."""
+    """Search for a key begining from the given node
+    
+    @type key: int
+	@param key: a key to be searched
+	@type dist: int
+    @param dist: the distance to start counting from
+    @rtype: (AVLNode,int)
+	@returns: a tuple (x,e) where x is the node corresponding to key,
+    or the virtual node where it should have been,
+	and e is the number of edges on the path between the starting node and ending node+1.
+	"""
 
     def search_from(
         self, key: int, node: AVLNode, dist: int = 1
@@ -224,7 +253,15 @@ class AVLTree(object):
 
         return node, dist
 
-    """Helper Function: Search for a key begining from the max node."""
+    """Search for a key begining from the max node
+    
+    @type key: int
+	@param key: a key to be searched
+    @rtype: (AVLNode,int)
+	@returns: a tuple (x,e) where x is the node corresponding to key,
+    or the virtual node where it should have been,
+	and e is the number of edges on the path between the starting node and ending node+1.
+	"""
 
     def search_from_max(self, key: int) -> tuple[AVLNode, int]:
         node = self.max
@@ -235,6 +272,7 @@ class AVLTree(object):
             node = node.parent
             dist += 1
 
+        # Begin the search from the root of the aquired subtree
         return self.search_from(key, node, dist)
 
     """inserts a new node into the dictionary with corresponding key and value (starting at the root)
@@ -252,10 +290,10 @@ class AVLTree(object):
 
     def insert(self, key: int, val) -> tuple[AVLNode, int, int]:
         node = AVLNode(key, val)
-        # Add virtual kids that may be replaced later
+        # Add virtual children that may be replaced later
         node.add_virtual_children()
 
-        # First insert, create the root
+        # Tree empty -> create the root
         if self.t_size == 0:
             node.height = 0
             self.root = node
@@ -264,6 +302,7 @@ class AVLTree(object):
             # No travel and no promotions
             return self.root, 0, 0
 
+        # Find the virtual node where the new node need be inserted
         spot, dist = self.search_from(key, self.root)
         p = self.insert_at(spot, node)
 
@@ -284,10 +323,10 @@ class AVLTree(object):
 
     def finger_insert(self, key: int, val) -> tuple[AVLNode, int, int]:
         node = AVLNode(key, val)
-        # Add virtual kids that may be replaced later
+        # Add virtual children that may be replaced later
         node.add_virtual_children()
 
-        # First insert, create the root
+        # Tree empty -> create the root
         if self.t_size == 0:
             node.height = 0
             self.root = node
@@ -296,13 +335,21 @@ class AVLTree(object):
             # No travel and no promotions
             return self.root, 0, 0
 
+        # Find the virtual node where the new node need be inserted
         spot, dist = self.search_from_max(key)
         p = self.insert_at(spot, node)
 
         return node, dist, p
 
-    """
-    @pre: spot is a virtual node
+    """Insert the given node in the given spot
+    @type spot: AVLNode
+    @pre spot: is a virtual node
+    @param spot: where the node needs to be inserted
+    @type node: AVLNode
+    @pre node: has virtual children
+    @param node: the node to insert into the tree
+    @rtype: int
+    @returns: number of promotes in the balancing process
     """
 
     def insert_at(self, spot: AVLNode, node: AVLNode) -> int:
@@ -330,8 +377,10 @@ class AVLTree(object):
 	"""
 
     def delete(self, node: AVLNode):
+        # Update tree size
         self.t_size -= 1
 
+        # Only node
         if self.t_size == 0:
             self.root = None
             self.max = None
@@ -377,6 +426,7 @@ class AVLTree(object):
             while self.max.right.is_real_node():
                 self.max = self.max.right
 
+        # Rebalance the tree from the parent of the deleted node upwards
         self.rebalance(node.parent)
 
     """joins self with item and another AVLTree
@@ -392,7 +442,7 @@ class AVLTree(object):
 	"""
 
     def join(self, tree2: "AVLTree", key: int, val):
-        # Handle edge cases
+        # One of them is empty
         if self.root is None:
             tree2.insert(key, val)
             self.tree_from_root(tree2.root)
@@ -401,6 +451,7 @@ class AVLTree(object):
             self.insert(key, val)
             return
 
+        # Update tree size
         self.t_size += tree2.t_size + 1
 
         # Determine tall and short trees
@@ -453,20 +504,23 @@ class AVLTree(object):
 	dictionary larger than node.key.
 	"""
 
-    def split(self, node: AVLNode) -> ("AVLTree", "AVLTree"):
+    def split(self, node: AVLNode) -> tuple["AVLTree", "AVLTree"]:
         # Spliting from root is simple
         if node == self.root:
             return AVLTree(node.left), AVLTree(node.right)
 
-        # Initialize two new AVL trees
+        # Initialize two new AVL trees from the node's children
         left_tree = AVLTree(node.left)
         right_tree = AVLTree(node.right)
 
+        # Go up to the root and attach nodes to the left/right trees
         prev = node
         current = node.parent
         while current is not None:
+            # If went left, everything above me is smaller
             if prev.is_right_child():
                 left_tree.join(AVLTree(current.left), current.key, current.value)
+            # If went right, everything above me is bigger
             else:
                 right_tree.join(AVLTree(current.right), current.key, current.value)
 
@@ -483,11 +537,7 @@ class AVLTree(object):
     """
 
     def rebalance(self, node: AVLNode) -> int:
-        """_summary_
-
-        Args:
-            node (AVLNode): _description_
-        """
+        # Promotions counter
         p = 0
 
         while node is not None:
@@ -498,23 +548,32 @@ class AVLTree(object):
             # Calculate balance factor
             bf = node.get_balance_factor()
 
-            # Perform rotations if needed
-            if bf > 1:  # Left-heavy
+            # Left-heavy
+            if bf > 1:
                 if (node.left.left.height) >= (node.left.right.height):
-                    self.r_rotate(node)  # Right rotation
+                    self.r_rotate(node)
                 else:
-                    self.lr_rotate(node)  # Left-right rotation
-            elif bf < -1:  # Right-heavy
+                    self.lr_rotate(node)
+            # Right-heavy
+            elif bf < -1:
                 if (node.right.right.height) >= (node.right.left.height):
-                    self.l_rotate(node)  # Left rotation
+                    self.l_rotate(node)
                 else:
-                    self.rl_rotate(node)  # Right-left rotation
-            elif old_height < node.height:  # promote
+                    self.rl_rotate(node)
+            # Promote
+            elif old_height < node.height:
                 p += 1
 
             node = node.parent
 
-    """Rotation helper functions"""
+    """Rotate the node and its right/left child via left/right rotation
+    
+    @type node: AVLNode
+    @pre node: has a right/left child in respect to the requested rotation
+    @param node: the parent node of the two needed for rotation
+    @type right: bool
+    @param right: True for right rotation, False for left
+    """
 
     def rotate(self, node: AVLNode, right: bool):
         # Handle moving root
@@ -531,15 +590,45 @@ class AVLTree(object):
         node.calc_height()
         child.calc_height()
 
+    """Rotate the node and its left child via right rotation
+    
+    @type node: AVLNode
+    @pre node: has a left child
+    @param node: the parent node of the two needed for rotation
+    """
+
     def r_rotate(self, node: AVLNode):
         self.rotate(node, True)
+
+    """Rotate the node and its right child via left rotation
+    
+    @type node: AVLNode
+    @pre node: has a right child
+    @param node: the parent node of the two needed for rotation
+    """
 
     def l_rotate(self, node: AVLNode):
         self.rotate(node, False)
 
+    """Rotate the node's left child and its right child via left rotation,
+    and then the node and its left child via right rotation
+    
+    @type node: AVLNode
+    @pre node: has a left child, and it has right child
+    @param node: the heighest node of the three needed for rotation
+    """
+
     def lr_rotate(self, node: AVLNode):
         self.l_rotate(node.left)
         self.r_rotate(node)
+
+    """Rotate the node's right child and its left child via right rotation,
+    and then the node and its right child via left rotation
+    
+    @type node: AVLNode
+    @pre node: has a right child, and it has left child
+    @param node: the heighest node of the three needed for rotation
+    """
 
     def rl_rotate(self, node: AVLNode):
         self.r_rotate(node.right)
@@ -555,7 +644,13 @@ class AVLTree(object):
         # inOrder search will provide a sorted list
         return self.in_order(self.root)
 
-    """Helper function: recursively generate a sorted list of (key, value) pairs in a tree"""
+    """Recursively generate a sorted list of (key, value) pairs in a tree
+    
+    @type node: AVLNode
+    @param node: node to start the in_order list from
+    @rtype: list
+	@returns: a sorted list according to key of touples (key, value) representing the data structure
+	"""
 
     def in_order(self, node: AVLNode) -> list[tuple[int, Any]]:
         if not node.is_real_node():
