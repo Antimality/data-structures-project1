@@ -24,14 +24,14 @@ class TestAVLNode(unittest.TestCase):
 
     def test_is_leaf_node(self):
         node = AVLNode(1, "leaf")
-        node.add_virtual_kids()
+        node.add_virtual_children()
         self.assertTrue(node.is_leaf_node())
 
     def test_height_calculation(self):
         parent = AVLNode(10, "parent")
         left_child = AVLNode(5, "left")
         right_child = AVLNode(15, "right")
-        parent.add_virtual_kids()
+        parent.add_virtual_children()
         parent.insert_child(left_child, False)
         parent.insert_child(right_child, True)
         left_child.height = 0
