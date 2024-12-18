@@ -345,10 +345,11 @@ class AVLTree(object):
                 node.parent.left = None
             node.parent.add_virtual_children()
 
-        # Only one child: left
+        # One child
         elif not node.right.is_real_node() or not node.left.is_real_node():
             child = node.left if node.left.is_real_node() else node.right
-            node.parent.insert_child(child, node.is_right_child())
+            if node.parent is not None:
+                node.parent.insert_child(child, node.is_right_child())
             # Update root pointer if needed
             if node == self.root:
                 self.root = child
