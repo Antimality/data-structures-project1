@@ -644,6 +644,8 @@ class AVLTree(object):
 	"""
 
     def avl_to_array(self):
+        if self.root is None:
+            return []
         # inOrder search will provide a sorted list
         return self.in_order(self.root)
 
