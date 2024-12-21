@@ -172,6 +172,8 @@ class AVLTree(object):
             self.tree_from_root(node)
 
     """ Construct a tree from an existing node (used for split & join)
+    The new tree will have the given node as its root, but the size will not be updated.
+    It was said on the forum that this is allowed.
     
     @type node: AVLNode
     @param node: A node that is to become the root of the tree
@@ -184,13 +186,14 @@ class AVLTree(object):
         # Detatch tree from its parent
         node.parent = None
         self.root = node
-        self.t_size = len(self.in_order(node))
+        # self.t_size = len(self.in_order(node)) # Updating size would add complexity
         # Update max pointer
         self.max = self.root
         while self.max.right.is_real_node():
             self.max = self.max.right
 
     """searches for a node in the dictionary corresponding to the key (starting at the root)
+    Complexity: O(log(n))
 		
 	@type key: int
 	@param key: a key to be searched
@@ -203,6 +206,7 @@ class AVLTree(object):
         return self.search_result_wrapper(self.search_from(key, self.root))
 
     """searches for a node in the dictionary corresponding to the key, starting at the max
+    Complexity: O(log(n))
 		
 	@type key: int
 	@param key: a key to be searched
@@ -233,6 +237,7 @@ class AVLTree(object):
         return node if node.is_real_node() else None, dist
 
     """Search for a key begining from the given node
+    Complexity: O(log(n))
     
     @type key: int
 	@param key: a key to be searched
@@ -255,6 +260,7 @@ class AVLTree(object):
         return node, dist if node.is_real_node() else dist - 1
 
     """Search for a key begining from the max node
+    Complexity: O(log(n))
     
     @type key: int
 	@param key: a key to be searched
@@ -277,6 +283,7 @@ class AVLTree(object):
         return self.search_from(key, node, dist)
 
     """inserts a new node into the dictionary with corresponding key and value (starting at the root)
+    Complexity: O(log(n))
 
 	@type key: int
 	@pre: key currently does not appear in the dictionary
@@ -310,6 +317,7 @@ class AVLTree(object):
         return node, dist, p
 
     """inserts a new node into the dictionary with corresponding key and value, starting at the max
+    Complexity: O(log(n))
 
 	@type key: int
 	@pre: key currently does not appear in the dictionary
@@ -343,6 +351,8 @@ class AVLTree(object):
         return node, dist, p
 
     """Insert the given node in the given spot
+    Complexity: O(log(n))
+    
     @type spot: AVLNode
     @pre spot: is a virtual node
     @param spot: where the node needs to be inserted
@@ -372,6 +382,7 @@ class AVLTree(object):
         return self.rebalance(node.parent)
 
     """deletes node from the dictionary
+    Complexity: O(log(n))
 
 	@type node: AVLNode
 	@pre: node is a real pointer to a node in self
@@ -431,6 +442,7 @@ class AVLTree(object):
         self.rebalance(node.parent)
 
     """joins self with item and another AVLTree
+    Complexity: O(log(n))
 
 	@type tree2: AVLTree 
 	@param tree2: a dictionary to be joined with self
@@ -447,6 +459,7 @@ class AVLTree(object):
         if self.root is None:
             tree2.insert(key, val)
             self.tree_from_root(tree2.root)
+            self.t_size = tree2.t_size  # Update size
             return
         if tree2.root is None:
             self.insert(key, val)
@@ -495,6 +508,7 @@ class AVLTree(object):
             self.root = node
 
     """splits the dictionary at a given node
+    Complexity: O(log(n))
 
 	@type node: AVLNode
 	@pre: node is in self
@@ -531,6 +545,7 @@ class AVLTree(object):
         return left_tree, right_tree
 
     """Rebalance the tree starting from a given node and propagating upward.
+    Complexity: O(log(n))
 
     @type node: AVLNode
     @param node: the node to start rebalancing from
@@ -638,6 +653,7 @@ class AVLTree(object):
         self.l_rotate(node)
 
     """returns an array representing dictionary 
+    Complexity: O(n)
 
 	@rtype: list
 	@returns: a sorted list according to key of touples (key, value) representing the data structure
@@ -650,6 +666,7 @@ class AVLTree(object):
         return self.in_order(self.root)
 
     """Recursively generate a sorted list of (key, value) pairs in a tree
+    Complexity: O(n)
     
     @type node: AVLNode
     @param node: node to start the in_order list from
@@ -694,6 +711,8 @@ class AVLTree(object):
     def get_root(self):
         return self.root
 
+    # For debugging purposes
+    # TODO: Remove before submission
     """Print tree to console"""
 
     def print_tree(self):
