@@ -507,6 +507,10 @@ class AVLTree(object):
             # Update root
             self.root = node
 
+        # Update max pointer if needed
+        if tree2.max.key > self.max.key:
+            self.max = tree2.max
+
     """splits the dictionary at a given node
     Complexity: O(log(n))
 
