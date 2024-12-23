@@ -6,7 +6,7 @@
 # username2: ortalsimany
 from typing import Any
 
-"""A class represnting a node in an AVL tree"""
+"""A class representing a node in an AVL tree"""
 
 
 class AVLNode(object):
@@ -183,7 +183,7 @@ class AVLTree(object):
         # Ignore a tree that is virtually empty
         if not node.is_real_node():
             return
-        # Detatch tree from its parent
+        # Detach tree from its parent
         node.parent = None
         self.root = node
         # self.t_size = len(self.in_order(node)) # Updating size would add complexity
@@ -218,8 +218,8 @@ class AVLTree(object):
     def finger_search(self, key: int) -> tuple[AVLNode | None, int]:
         return self.search_result_wrapper(self.search_from_max(key))
 
-    """Wrapper Fucntion for search_from that returns in the format they want
-    Recieves the result of a search_from function and returns the same,
+    """Wrapper Function for search_from that returns in the format they want
+    Receives the result of a search_from function and returns the same,
     but if the node is virtual it replaces it with None.
     
     @type tup: (AVLNode, int)
@@ -236,7 +236,7 @@ class AVLTree(object):
         dist = tup[1]
         return node if node.is_real_node() else None, dist
 
-    """Search for a key begining from the given node
+    """Search for a key beginning from the given node
     Complexity: O(log(n))
     
     @type key: int
@@ -259,7 +259,7 @@ class AVLTree(object):
         # If no node was found, only include the search distance within real nodes
         return node, dist if node.is_real_node() else dist - 1
 
-    """Search for a key begining from the max node
+    """Search for a key beginning from the max node
     Complexity: O(log(n))
     
     @type key: int
@@ -279,7 +279,7 @@ class AVLTree(object):
             node = node.parent
             dist += 1
 
-        # Begin the search from the root of the aquired subtree
+        # Begin the search from the root of the acquired subtree
         return self.search_from(key, node, dist)
 
     """inserts a new node into the dictionary with corresponding key and value (starting at the root)
@@ -374,7 +374,7 @@ class AVLTree(object):
         balancing_needed = spot.parent.is_leaf_node()
         node.create_leaf(spot)
 
-        # Simple insursion with non-leaf parent
+        # Simple insertion with non-leaf parent
         if not balancing_needed:
             # No changes => no promotions
             return 0
@@ -447,7 +447,7 @@ class AVLTree(object):
 	@type tree2: AVLTree 
 	@param tree2: a dictionary to be joined with self
 	@type key: int 
-	@param key: the key separting self and tree2
+	@param key: the key separating self and tree2
 	@type val: string
 	@param val: the value corresponding to key
 	@pre: all keys in self are smaller than key and all keys in tree2 are larger than key,
@@ -520,7 +520,7 @@ class AVLTree(object):
 	"""
 
     def split(self, node: AVLNode) -> tuple["AVLTree", "AVLTree"]:
-        # Spliting from root is simple
+        # Splitting from root is simple
         if node == self.root:
             return AVLTree(node.left), AVLTree(node.right)
 
@@ -633,7 +633,7 @@ class AVLTree(object):
     
     @type node: AVLNode
     @pre node: has a left child, and it has right child
-    @param node: the heighest node of the three needed for rotation
+    @param node: the highest node of the three needed for rotation
     """
 
     def lr_rotate(self, node: AVLNode):
@@ -645,7 +645,7 @@ class AVLTree(object):
     
     @type node: AVLNode
     @pre node: has a right child, and it has left child
-    @param node: the heighest node of the three needed for rotation
+    @param node: the highest node of the three needed for rotation
     """
 
     def rl_rotate(self, node: AVLNode):
@@ -656,7 +656,7 @@ class AVLTree(object):
     Complexity: O(n)
 
 	@rtype: list
-	@returns: a sorted list according to key of touples (key, value) representing the data structure
+	@returns: a sorted list according to key of tuples (key, value) representing the data structure
 	"""
 
     def avl_to_array(self):
@@ -671,7 +671,7 @@ class AVLTree(object):
     @type node: AVLNode
     @param node: node to start the in_order list from
     @rtype: list
-	@returns: a sorted list according to key of touples (key, value) representing the data structure
+	@returns: a sorted list according to key of tuples (key, value) representing the data structure
 	"""
 
     def in_order(self, node: AVLNode) -> list[tuple[int, Any]]:
