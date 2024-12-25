@@ -701,7 +701,7 @@ class AVLTree(object):
 
     def max_node(self):
         # Update max pointer if needed (might be None after delete or split)
-        if self.max is None:
+        if self.max is None and self.root is not None:
             self.max = self.root
             while self.max.right.is_real_node():
                 self.max = self.max.right
