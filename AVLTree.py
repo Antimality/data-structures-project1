@@ -186,11 +186,12 @@ class AVLTree(object):
         # Detach tree from its parent
         node.parent = None
         self.root = node
-        # self.t_size = len(self.in_order(node)) # Updating size would add complexity
-        # Update max pointer
+        """ The following would add to split complexity. Max will be updated when needed.
+        self.t_size = len(self.in_order(node)) # Updating size would add complexity
         self.max = self.root
         while self.max.right.is_real_node():
             self.max = self.max.right
+        """
 
     """searches for a node in the dictionary corresponding to the key (starting at the root)
     Complexity: O(log(n))
@@ -271,7 +272,7 @@ class AVLTree(object):
 	"""
 
     def search_from_max(self, key: int) -> tuple[AVLNode, int]:
-        node = self.max
+        node = self.max_node()
         dist = 1
 
         # Go up the tree until the required key can be in the subtree
@@ -365,7 +366,7 @@ class AVLTree(object):
 
     def insert_at(self, spot: AVLNode, node: AVLNode) -> int:
         # Maintain pointer to max node
-        if node.key > self.max.key:
+        if node.key > self.max_node().key:
             self.max = node
 
         # Update tree size
@@ -414,6 +415,7 @@ class AVLTree(object):
             # Update root pointer if needed
             if node == self.root:
                 self.root = child
+                child.parent = None
 
         # Two children
         else:
@@ -432,11 +434,9 @@ class AVLTree(object):
             # Delete the successor, which is guaranteed to have at most one child
             self.delete(successor)
 
-        # Update max pointer if needed
-        if node == self.max:
-            self.max = self.root
-            while self.max.right.is_real_node():
-                self.max = self.max.right
+        # Delete max pointer if needed, will be updated the first time max_node() is called
+        if node == self.max_node():
+            self.max = None
 
         # Rebalance the tree from the parent of the deleted node upwards
         self.rebalance(node.parent)
@@ -460,6 +460,7 @@ class AVLTree(object):
             tree2.insert(key, val)
             self.tree_from_root(tree2.root)
             self.t_size = tree2.t_size  # Update size
+            self.max = tree2.max_node()  # Update max pointer
             return
         if tree2.root is None:
             self.insert(key, val)
@@ -508,8 +509,8 @@ class AVLTree(object):
             self.root = node
 
         # Update max pointer if needed
-        if tree2.max.key > self.max.key:
-            self.max = tree2.max
+        if tree2.max_node().key > self.max_node().key:
+            self.max = tree2.max_node()
 
     """splits the dictionary at a given node
     Complexity: O(log(n))
@@ -545,6 +546,10 @@ class AVLTree(object):
 
             prev = current
             current = current.parent
+
+        # Delete max pointers, will be updated the first time max_node() is called
+        left_tree.max = None
+        right_tree.max = None
 
         return left_tree, right_tree
 
@@ -695,6 +700,12 @@ class AVLTree(object):
 	"""
 
     def max_node(self):
+        # Update max pointer if needed (might be None after delete or split)
+        if self.max is None:
+            self.max = self.root
+            while self.max.right.is_real_node():
+                self.max = self.max.right
+
         return self.max
 
     """returns the number of items in dictionary 
