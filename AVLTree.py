@@ -508,9 +508,8 @@ class AVLTree(object):
             # Update root
             self.root = node
 
-        # Update max pointer if needed
-        if tree2.max_node().key > self.max_node().key:
-            self.max = tree2.max_node()
+        # Delete max pointer, will be updated the first time max_node() is called
+        self.max = None
 
     """splits the dictionary at a given node
     Complexity: O(log(n))
@@ -547,9 +546,8 @@ class AVLTree(object):
             prev = current
             current = current.parent
 
-        # Delete max pointers, will be updated the first time max_node() is called
-        left_tree.max = None
-        right_tree.max = None
+        # Max pointers will be None on both trees after the split, will be updated when needed.
+        # Sizes won't be updated, as per the forum.
 
         return left_tree, right_tree
 
