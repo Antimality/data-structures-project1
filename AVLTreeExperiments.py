@@ -1,6 +1,5 @@
 import time
 import random
-from AVLTree import AVLNode
 from AVLTree import AVLTree  # ודא שהקובץ AVLTree.py מכיל את המימוש של AVL Tree
 
 
