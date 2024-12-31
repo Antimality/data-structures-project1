@@ -303,7 +303,7 @@ class AVLTree(object):
         node.add_virtual_children()
 
         # Tree empty -> create the root
-        if self.t_size == 0:
+        if self.root is None:
             node.height = 0
             self.root = node
             self.t_size += 1
@@ -337,7 +337,7 @@ class AVLTree(object):
         node.add_virtual_children()
 
         # Tree empty -> create the root
-        if self.t_size == 0:
+        if self.root is None:
             node.height = 0
             self.root = node
             self.t_size += 1
@@ -394,7 +394,7 @@ class AVLTree(object):
         self.t_size -= 1
 
         # Only node
-        if self.t_size == 0:
+        if node == self.root and node.is_leaf_node():
             self.root = None
             self.max = None
             return
