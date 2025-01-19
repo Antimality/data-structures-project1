@@ -253,6 +253,9 @@ class AVLTree(object):
     def search_from(
         self, key: int, node: AVLNode, dist: int = 1
     ) -> tuple[AVLNode, int]:
+        if self.root is None:
+            return AVLNode(), -1
+
         while node.key != key and node.is_real_node():
             node = node.right if key > node.key else node.left
             dist += 1
